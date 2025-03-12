@@ -26,14 +26,11 @@ export function ReactExamples() {
     );
   }
 
-  function renderTabButton(example) {
+  function renderTabButton({ value, label }) {
     return (
       <li>
-        <button
-          className={selectedTopic === example.value ? "active" : undefined}
-          onClick={() => handleSelect(example.value)}
-        >
-          {example.label}
+        <button className={selectedTopic === value ? "active" : undefined} onClick={() => handleSelect(value)}>
+          {label}
         </button>
       </li>
     );

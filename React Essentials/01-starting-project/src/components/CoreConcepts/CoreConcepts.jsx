@@ -15,7 +15,7 @@ export function CoreConcepts() {
   return (
     <section id="core-concepts">
       <h2>Core Concepts</h2>
-      <ul>{CORE_CONCEPTS.map((concept) => renderCoreConcept({ ...concept }))}</ul>
+      <ul>{CORE_CONCEPTS.map((concept) => renderCoreConcept(concept))}</ul>
     </section>
   );
 }
