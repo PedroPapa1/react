@@ -6,3 +6,6 @@ export function Section({ title, id, children }) {
     </section>
   );
 }
+
+// ...props
+// {...props}
