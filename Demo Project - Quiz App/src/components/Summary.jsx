@@ -1,13 +1,44 @@
+import { useContext } from "react";
 import quizCompleteImg from "../assets/quiz-complete.png";
-import QUESTIONS from "../questions.js";
+import { QuizContext } from "./QuizContext.js";
 
-export function Summary({ userAnswers }) {
-  const skippedAnswers = userAnswers.filter((answer) => answer === null);
-  const correctAnswers = userAnswers.filter((answer, index) => answer === QUESTIONS[index].answers[0]);
+const MAX_PERCENTAGE = 100;
 
-  const skippedAnswersShare = Math.round(skippedAnswers.length / userAnswers.length) * 100;
-  const correctAnswersShare = Math.round(correctAnswers.length / userAnswers.length) * 100;
-  const wrongAnswersShare = 100 - skippedAnswersShare - correctAnswersShare;
+export function Summary() {
+  const { questions, userAnswers } = useContext(QuizContext);
+
+  const skippedAnswers = userAnswers.filter(({ answer }) => answer === "skipped");
+  const correctAnswers = userAnswers.filter(({ isCorrect }) => isCorrect);
+
+  const skippedAnswersShare = Math.round((skippedAnswers.length / userAnswers.length) * MAX_PERCENTAGE);
+  const correctAnswersShare = Math.round((correctAnswers.length / userAnswers.length) * MAX_PERCENTAGE);
+  const wrongAnswersShare = MAX_PERCENTAGE - skippedAnswersShare - correctAnswersShare;
+
+  function getCssClasses(isCorrect, isSkipped) {
+    const cssClass = "user-answer";
+
+    if (isSkipped) {
+      return `${cssClass} skipped`;
+    }
+
+    if (isCorrect) {
+      return `${cssClass} correct`;
+    }
+
+    return `${cssClass} wrong`;
+  }
+
+  function renderAnswer(answer, isCorrect, index) {
+    const isSkipped = answer === "skipped";
+
+    return (
+      <li key={`${answer}-${index}`}>
+        <h3>{index + 1}</h3>
+        <p className="question">{questions[index].text}</p>
+        <p className={getCssClasses(isCorrect, isSkipped)}>{isSkipped ? "Skipped" : answer}</p>
+      </li>
+    );
+  }
 
   return (
     <div id="summary">
@@ -27,27 +58,7 @@ export function Summary({ userAnswers }) {
           <span className="text">answered incorrectly</span>
         </p>
       </div>
-      <ol>
-        {userAnswers.map((answer, index) => {
-          let cssClass = "user-answer";
-
-          if (answer === null) {
-            cssClass += " skipped";
-          } else if (answer === QUESTIONS[index].answers[0]) {
-            cssClass += " correct";
-          } else {
-            cssClass += " wrong";
-          }
-
-          return (
-            <li key={index}>
-              <h3>{index + 1}</h3>
-              <p className="question">{QUESTIONS[index].text}</p>
-              <p className={cssClass}>{answer ?? "Skipped"}</p>
-            </li>
-          );
-        })}
-      </ol>
+      <ol>{userAnswers.map(({ answer, isCorrect }, index) => renderAnswer(answer, isCorrect, index))}</ol>
     </div>
   );
 }

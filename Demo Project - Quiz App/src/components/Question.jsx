@@ -1,65 +1,29 @@
 import { QuestionTimer } from "./QuestionTimer";
 import { Answers } from "./Answers";
-import { useState } from "react";
-import QUESTIONS from "../questions.js";
+import { useContext, useMemo } from "react";
+import { QuizContext } from "./QuizContext.js";
+import { ANSWERED_TIMER, LOADING_TIMER, TIME_TO_ANSWER } from "./constants.js";
 
-export function Question({ index, onSelectAnswer, onSkipAnswer }) {
-  const [answer, setAnswer] = useState({
-    selectedAnswer: "",
-    isCorrect: null,
-  });
+export function Question() {
+  const { currentQuestion, currentAnswer } = useContext(QuizContext);
 
-  let timer = 10000;
+  const timer = useMemo(() => {
+    if (currentAnswer.state === "answered") {
+      return LOADING_TIMER;
+    }
 
-  if (answer.selectedAnswer) {
-    timer = 1000;
-  }
+    if (currentAnswer.state === "correct" || currentAnswer.state === "wrong") {
+      return ANSWERED_TIMER;
+    }
 
-  if (answer.isCorrect !== null) {
-    timer = 2000;
-  }
-
-  function handleSelectAnswer(answer) {
-    setAnswer({
-      selectedAnswer: answer,
-      isCorrect: null,
-    });
-
-    setTimeout(() => {
-      setAnswer({
-        selectedAnswer: answer,
-        isCorrect: QUESTIONS[index].answers[0] === answer,
-      });
-
-      setTimeout(() => {
-        onSelectAnswer(answer);
-      }, 2000);
-    }, 1000);
-  }
-
-  let answerState = "";
-
-  if (answer.selectedAnswer && answer.isCorrect !== null) {
-    answerState = answer.isCorrect ? "correct" : "wrong";
-  } else if (answer.selectedAnswer) {
-    answerState = "answered";
-  }
+    return TIME_TO_ANSWER;
+  }, [currentAnswer.state]);
 
   return (
     <div id="question">
-      <QuestionTimer
-        key={timer}
-        timeout={timer}
-        onTimeout={answer.selectedAnswer === "" ? onSkipAnswer : null}
-        mode={answerState}
-      />
-      <h2>{QUESTIONS[index].text}</h2>
-      <Answers
-        answers={QUESTIONS[index].answers}
-        selectedAnswer={answer.selectedAnswer}
-        answerState={answerState}
-        onSelect={handleSelectAnswer}
-      />
+      <QuestionTimer key={`${currentQuestion.id}-${timer}`} timer={timer} />
+      <h2>{currentQuestion.text}</h2>
+      <Answers />
     </div>
   );
 }
