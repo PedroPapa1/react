@@ -1,11 +1,10 @@
-import { useContext } from "react";
 import quizCompleteImg from "../assets/quiz-complete.png";
-import { QuizContext } from "./QuizContext.js";
+import { useQuizContext } from "./QuizContext";
 
 const MAX_PERCENTAGE = 100;
 
 export function Summary() {
-  const { questions, userAnswers } = useContext(QuizContext);
+  const { questions, userAnswers } = useQuizContext();
 
   const skippedAnswers = userAnswers.filter(({ answer }) => answer === "skipped");
   const correctAnswers = userAnswers.filter(({ isCorrect }) => isCorrect);

@@ -1,10 +1,9 @@
-import { useContext } from "react";
 import { Question } from "./Question.jsx";
 import { Summary } from "./Summary.jsx";
-import { QuizContext } from "./QuizContext.js";
+import { useQuizContext } from "./QuizContext";
 
 export function Quiz() {
-  const { currentQuestion, questions, userAnswers } = useContext(QuizContext);
+  const { currentQuestion, questions, userAnswers } = useQuizContext();
 
   if (questions.length === userAnswers.length) {
     return <Summary />;

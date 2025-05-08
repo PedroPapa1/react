@@ -1,11 +1,11 @@
 import { QuestionTimer } from "./QuestionTimer";
 import { Answers } from "./Answers";
-import { useContext, useMemo } from "react";
-import { QuizContext } from "./QuizContext.js";
+import { useMemo } from "react";
+import { useQuizContext } from "./QuizContext";
 import { ANSWERED_TIMER, LOADING_TIMER, TIME_TO_ANSWER } from "./constants.js";
 
 export function Question() {
-  const { currentQuestion, currentAnswer } = useContext(QuizContext);
+  const { currentQuestion, currentAnswer } = useQuizContext();
 
   const timer = useMemo(() => {
     if (currentAnswer.state === "answered") {

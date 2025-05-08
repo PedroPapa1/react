@@ -1,13 +1,10 @@
-import { useContext, useMemo } from "react";
-import { QuizContext } from "./QuizContext.js";
+import { useMemo } from "react";
+import { useQuizContext } from "./QuizContext";
 
 export function Answers() {
-  const { handleSelectAnswer, currentAnswer, currentQuestion } = useContext(QuizContext);
+  const { selectAnswer, currentAnswer, currentQuestion } = useQuizContext();
 
-  const shuffledAnswers = useMemo(
-    () => [...currentQuestion.answers].sort(() => Math.random() - 0.5),
-    [currentQuestion]
-  );
+  const shuffledAnswers = useMemo(() => currentQuestion.answers.toSorted(() => Math.random() - 0.5), [currentQuestion]);
 
   function getCssClasses(answerOption) {
     const isSelected = currentAnswer.answer === answerOption;
@@ -28,7 +25,7 @@ export function Answers() {
       {shuffledAnswers.map((answerOption) => (
         <li key={answerOption} className="answer">
           <button
-            onClick={() => handleSelectAnswer(answerOption)}
+            onClick={() => selectAnswer(answerOption)}
             className={getCssClasses(answerOption)}
             disabled={currentAnswer.state !== ""}
           >

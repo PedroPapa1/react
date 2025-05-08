@@ -1,24 +1,28 @@
-import { useState, useCallback, useMemo } from "react";
-import { QuizContext } from "./QuizContext.js";
-import QUESTIONS from "../questions.js";
-import { ANSWERED_TIMER, LOADING_TIMER } from "./constants.js";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { QuizContext } from "./useQuizContext.js";
+import { ANSWERED_TIMER, LOADING_TIMER } from "../constants.js";
+import { checkAnswer } from "./checkAnswer.js";
 
-const CORRECT_ANSWER_INDEX = 0;
-
-function checkAnswer(answer, questionIndex) {
-  return answer === QUESTIONS[questionIndex].answers[CORRECT_ANSWER_INDEX];
-}
-
-export function QuizProvider({ children }) {
+export function QuizProvider({ children, questions }) {
   const [userAnswers, setUserAnswers] = useState([]);
   const [currentAnswer, setCurrentAnswer] = useState({
     answer: "",
     state: "",
   });
 
-  const currentQuestion = useMemo(() => QUESTIONS[userAnswers.length], [userAnswers]);
+  const currentQuestion = useMemo(() => questions[userAnswers.length], [userAnswers]);
 
-  const handleSkipAnswer = useCallback(() => {
+  const loadingTimeoutRef = useRef(undefined);
+  const answeredTimeoutRef = useRef(undefined);
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(loadingTimeoutRef.current);
+      clearTimeout(answeredTimeoutRef.current);
+    };
+  }, []);
+
+  const skipAnswer = useCallback(() => {
     setUserAnswers((prevUserAnswers) => [...prevUserAnswers, { answer: "skipped", isCorrect: false }]);
     setCurrentAnswer({
       answer: "",
@@ -26,22 +30,22 @@ export function QuizProvider({ children }) {
     });
   }, [setCurrentAnswer, setUserAnswers]);
 
-  const handleSelectAnswer = useCallback(
+  const selectAnswer = useCallback(
     (answer) => {
-      const isCorrect = checkAnswer(answer, userAnswers.length);
+      const isCorrect = checkAnswer(answer, questions, userAnswers.length);
 
       setCurrentAnswer({
         answer,
         state: "answered",
       });
 
-      setTimeout(() => {
+      loadingTimeoutRef.current = setTimeout(() => {
         setCurrentAnswer({
           answer,
           state: isCorrect ? "correct" : "wrong",
         });
 
-        setTimeout(() => {
+        answeredTimeoutRef.current = setTimeout(() => {
           setUserAnswers((prevUserAnswers) => {
             return [...prevUserAnswers, { answer, isCorrect }];
           });
@@ -61,9 +65,9 @@ export function QuizProvider({ children }) {
         userAnswers,
         currentQuestion,
         currentAnswer,
-        questions: QUESTIONS,
-        handleSelectAnswer,
-        handleSkipAnswer,
+        questions,
+        selectAnswer,
+        skipAnswer,
       }}
     >
       {children}
