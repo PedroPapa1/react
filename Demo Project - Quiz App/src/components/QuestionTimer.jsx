@@ -1,26 +1,34 @@
 import { useEffect } from "react";
 import { useState } from "react";
+import { useQuizContext } from "./QuizContext";
 
-export function QuestionTimer({ timeout, onTimeout, mode }) {
-  const [remainingTime, setRemainingTime] = useState(timeout);
+const TIMER_DECREMENT = 100;
+
+export function QuestionTimer({ timer }) {
+  const { skipAnswer, currentAnswer } = useQuizContext();
+  const [remainingTime, setRemainingTime] = useState(timer);
 
   useEffect(() => {
-    const timer = setTimeout(onTimeout, timeout);
+    const timeoutId = setTimeout(() => {
+      if (currentAnswer.answer === "") {
+        skipAnswer();
+      }
+    }, timer);
 
     return () => {
-      clearTimeout(timer);
+      clearTimeout(timeoutId);
     };
-  }, [timeout, onTimeout]);
+  }, [timer, skipAnswer, currentAnswer.answer]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setRemainingTime((prevReaminingTime) => prevReaminingTime - 100);
-    }, 100);
+      setRemainingTime((prevRemainingTime) => prevRemainingTime - TIMER_DECREMENT);
+    }, TIMER_DECREMENT);
 
     return () => {
       clearInterval(interval);
     };
   }, []);
 
-  return <progress id="question-time" max={timeout} value={remainingTime} className={mode} />;
+  return <progress id="question-time" max={timer} value={remainingTime} className={currentAnswer.state} />;
 }

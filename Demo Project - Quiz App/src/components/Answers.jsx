@@ -1,34 +1,38 @@
-import { useRef } from "react";
+import { useMemo } from "react";
+import { useQuizContext } from "./QuizContext";
 
-export function Answers({ answers, selectedAnswer, answerState, onSelect }) {
-  const shuffledAnswers = useRef();
+export function Answers() {
+  const { selectAnswer, currentAnswer, currentQuestion } = useQuizContext();
 
-  if (!shuffledAnswers.current) {
-    shuffledAnswers.current = [...answers];
-    shuffledAnswers.current.sort(() => Math.random() - 0.5);
+  const shuffledAnswers = useMemo(() => currentQuestion.answers.toSorted(() => Math.random() - 0.5), [currentQuestion]);
+
+  function getCssClasses(answerOption) {
+    const isSelected = currentAnswer.answer === answerOption;
+
+    if (currentAnswer.state === "answered" && isSelected) {
+      return "selected";
+    }
+
+    if ((currentAnswer.state === "correct" || currentAnswer.state === "wrong") && isSelected) {
+      return currentAnswer.state;
+    }
+
+    return "";
   }
 
   return (
     <ul id="answers">
-      {shuffledAnswers.current.map((answer) => {
-        const isSelected = selectedAnswer === answer;
-        let cssClasses = "";
-
-        if (answerState === "answered" && isSelected) {
-          cssClasses = "selected";
-        }
-
-        if ((answerState === "correct" || answerState === "wrong") && isSelected) {
-          cssClasses = answerState;
-        }
-        return (
-          <li key={answer} className="answer">
-            <button onClick={() => onSelect(answer)} className={cssClasses} disabled={answerState !== ""}>
-              {answer}
-            </button>
-          </li>
-        );
-      })}
+      {shuffledAnswers.map((answerOption) => (
+        <li key={answerOption} className="answer">
+          <button
+            onClick={() => selectAnswer(answerOption)}
+            className={getCssClasses(answerOption)}
+            disabled={currentAnswer.state !== ""}
+          >
+            {answerOption}
+          </button>
+        </li>
+      ))}
     </ul>
   );
 }
